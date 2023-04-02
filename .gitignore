@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Dataset is too big for GH repo, they will be stayed on GDrive
+datasets/*
+
+# Poetry lock file
+poetry.lock
+
 # C extensions
 *.so
 
