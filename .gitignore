@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # Dataset is too big for GH repo, they will be stayed on GDrive
-datasets/*
+datasets/
 
 # Poetry lock file
 poetry.lock
@@ -133,3 +133,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+src/models/train.py
+poetry.lock
