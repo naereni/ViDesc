@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 import pickle
 
 import cv2
 import pandas as pd
+import PIL
 import torch
-from PIL import Image
+from tqdm.contrib import tzip
+from train import Config
 from transformers import AutoModel, AutoProcessor
 
 DEVICE = (
@@ -11,43 +14,37 @@ DEVICE = (
 )
 
 
-def read_video(path: str, frames_num: int = 16) -> list[Image]:
-    frames: list[Image] = []
+def read_video(
+    config: Config, path: str, frames_num: int = 16
+) -> list[PIL.Image]:
+    frames: list[PIL.Image] = []
     cap = cv2.VideoCapture(path)
-
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     N = length // (frames_num)
-
     current_frame = 0
     for i in range(length):
         ret, frame = cap.read(current_frame)
-
         if ret and i == current_frame and len(frames) < frames_num:
-            size = 224, 224
-            frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            frame.thumbnail(size, Image.ANTIALIAS)
-
+            frame = PIL.Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            frame.thumbnail(config.extract_size, PIL.Image.ANTIALIAS)
             frames.append(frame)
             current_frame += N
-
     cap.release()
     return frames
 
 
-def generate_embeddings(
-    df: pd.DataFrame,
-    dir_path: str,
-    dump_path: str,
+def extract_features(
+    config: Config,
     encoder: AutoModel,
     processor: AutoProcessor,
     need_dump: bool = False,
 ) -> dict[torch.Tensor, list[str]]:
     encoder_embeds, all_captions = [], []
     encoder = encoder.to(DEVICE)
-
-    for video_desc, video_name in zip(df.captions, df.paths):
-        video_path = f"{dir_path}/{video_name[0]}.mp4"
-        video = read_video(video_path)
+    df = pd.read_csv(config.train_csv)
+    for video_desc, video_name in tzip(df.caption, df.paths):
+        video_path = f"{config.dir_path}/{video_name}"
+        video = read_video(config, video_path)
         inputs = processor(videos=list(video), return_tensors="pt")
         inputs = inputs.pixel_values.squeeze(0).to(DEVICE)
         text = f"Caption: {video_desc}<|endoftext|>"
@@ -63,7 +60,9 @@ def generate_embeddings(
         "captions": all_captions,
     }
 
+    print("%0d embeddings saved " % len(encoder_embeds))
+
     if need_dump:
-        with open(dump_path, "wb") as embed_dump:
+        with open(config.features_path, "wb") as embed_dump:
             pickle.dump(embeddings, embed_dump)
     return embeddings

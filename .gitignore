@@ -133,5 +133,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-src/models/train.py
 poetry.lock
