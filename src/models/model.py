@@ -34,6 +34,7 @@ class GPT2_Decoder(nn.Module):
 
         self.prefix_length = prefix_length
         self.gpt = GPT2LMHeadModel.from_pretrained(backbone)
+        self.gpt = freeze(self.gpt)
         self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
         self.clip_project = MLP(
             (
@@ -70,3 +71,28 @@ class GPT2_Decoder(nn.Module):
             inputs_embeds=embedding_cat, labels=labels, attention_mask=mask
         )
         return out
+
+
+def freeze(
+    model: GPT2_Decoder,
+    freeze_emb: bool = False,
+    freeze_ln: bool = False,
+    freeze_attn: bool = True,
+    freeze_ff: bool = True,
+    freeze_other: bool = True,
+) -> GPT2_Decoder:
+    for name, p in model.named_parameters():
+        # freeze all parameters except the layernorm and positional embeddings
+        name = name.lower()
+        if "ln" in name or "norm" in name:
+            p.requires_grad = not freeze_ln
+        elif "embeddings" in name:
+            p.requires_grad = not freeze_emb
+        elif "mlp" in name:
+            p.requires_grad = not freeze_ff
+        elif "attn" in name:
+            p.requires_grad = not freeze_attn
+        else:
+            p.requires_grad = not freeze_other
+
+    return model

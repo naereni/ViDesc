@@ -2,48 +2,29 @@
 import os
 import sys
 
+# import wandb
 import torch
-import wandb
+from config import Config
 from model import GPT2_Decoder
 from torch.nn import functional as nnf
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import (
     AdamW,
-    AutoModel,
-    AutoProcessor,
+    GPT2Tokenizer,
+    XCLIPModel,
+    XCLIPProcessor,
     get_linear_schedule_with_warmup,
 )
 from utils import extract_features
 
 from datasets import ClipCocoDataset
 
-wandb.init(project="ViDesc-training")
+# wandb.init(project="ViDesc-training")
 
 DEVICE = (
     torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 )
-
-
-class Config:
-    def __init__(self) -> None:
-        self.dir_path = "/content/videos_train"
-        self.train_csv = "/content/ru_mixkit_train.csv"
-        self.encoder_backbone = "microsoft/xclip-base-patch16-16-frames"
-        self.decoder_backbone = "sberbank-ai/rugpt3small_based_on_gpt2"
-        self.features_path = "mixkit_features_train.pkl"
-        self.out_dir = "checkpoints"
-        self.prefix = "ViDesc"
-        self.epochs = 10
-        self.extract_size = 224, 224
-        self.save_every = 1
-        self.prefix_length = 40
-        self.prefix_size = 768
-        self.bs = 10
-        self.only_prefix = False
-        self.lr = 5e-3
-        self.warmup_steps = 5000
-
 
 config = Config()
 
@@ -54,8 +35,8 @@ def train(
     model: GPT2_Decoder,
 ) -> GPT2_Decoder:
     epochs = config.epochs
-    if not os.path.exists(config.out_dir):
-        os.makedirs(config.out_dir)
+    if not os.path.exists(config.dir + config.out_dir):
+        os.makedirs(config.dir + config.out_dir)
 
     model = model.to(DEVICE)
     model.train()
@@ -98,7 +79,7 @@ def train(
             optimizer.step()
             scheduler.step()
 
-            wandb.log({"loss": loss.item()})
+            # wandb.log({"loss": loss.item()})
 
             progress.update()
 
@@ -120,38 +101,44 @@ def train(
 
 
 if __name__ == "__main__":
-    wandb.config = {
-        "learning_rate": config.lr,
-        "epochs": config.epochs,
-        "batch_size": config.bs,
-    }
+    # wandb.config = {
+    #     "learning_rate": config.lr,
+    #     "epochs": config.epochs,
+    #     "batch_size": config.bs,
+    # }
 
     print("--- Create models ---")
-    encoder = AutoModel.from_pretrained(config.encoder_backbone)
-    processor = AutoProcessor.from_pretrained(config.encoder_backbone)
+    encoder = XCLIPModel.from_pretrained(config.encoder_backbone)
+    processor = XCLIPProcessor.from_pretrained(config.encoder_backbone)
 
     decoder = GPT2_Decoder(
         prefix_length=config.prefix_length,
         backbone=config.decoder_backbone,
         prefix_size=config.prefix_size,
     )
+    tokenizer = GPT2Tokenizer.from_pretrained(config.decoder_backbone)
 
-    if not os.path.exists(config.features_path):
+    if not os.path.exists(config.dir + config.train_features_path):
         print("--- Feature extraction ---")
-        extract_features(
-            config, encoder=encoder, processor=processor, need_dump=True
-        )
+        extract_features(config, encoder, processor, tokenizer)
 
     print("--- Create dataset ---")
-    dataset = ClipCocoDataset(
-        data_path=config.features_path,
+    train_dataset = ClipCocoDataset(
+        data_path=config.dir + config.train_features_path,
         prefix_length=config.prefix_length,
-        gpt2_type=config.decoder_backbone,
+        tokenizer_type=config.decoder_backbone,
+    )
+
+    test_dataset = ClipCocoDataset(
+        data_path=config.dir + config.test_features_path,
+        prefix_length=config.prefix_length,
+        tokenizer_type=config.decoder_backbone,
     )
 
     print("--- Start training ---")
+    sys.stdout.flush()
     train(
-        config,
-        dataset,
-        decoder,
+        dataset=train_dataset,
+        config=config,
+        model=decoder,
     )

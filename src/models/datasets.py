@@ -6,7 +6,6 @@ from typing import Tuple
 
 import torch
 from torch.utils.data import Dataset
-from tqdm import tqdm
 from transformers import GPT2Tokenizer
 
 
@@ -15,31 +14,19 @@ class ClipCocoDataset(Dataset):
         self,
         data_path: str,
         prefix_length: int,
-        gpt2_type: str,
+        tokenizer_type: str,
         normalize_prefix: bool = False,
     ) -> None:
-        self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
-
+        self.tokenizer = GPT2Tokenizer.from_pretrained(tokenizer_type)
         with open(data_path, "rb") as f:
             all_data = pickle.load(f)
         print("Data size is %0d" % len(all_data["encoder_embeds"]))
 
         sys.stdout.flush()
         self.prefixes = all_data["encoder_embeds"]
-        self.captions = all_data["captions"]
-
-        self.captions_tokens = []
-        self.caption2embedding = []
-        max_seq_len = 0
-        for i, caption in enumerate(tqdm(self.captions)):
-            self.captions_tokens.append(
-                torch.tensor(self.tokenizer.encode(caption), dtype=torch.int64)
-            )
-            self.caption2embedding.append(self.prefixes[i])
-            max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
-
+        self.captions_tokens = all_data["captions_tokens"]
         all_len = torch.tensor(
             [len(self.captions_tokens[i]) for i in range(len(self))]
         ).float()
