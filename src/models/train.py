@@ -54,7 +54,7 @@ def train(
     for epoch in range(epochs):
         print(f">>> Training epoch {epoch}")
         sys.stdout.flush()
-        progress = tqdm(total=len(train_dataloader), desc=config.prefix)
+        progress = tqdm(total=len(train_dataloader), desc="ViDesc")
         for idx, (tokens, mask, prefix) in enumerate(train_dataloader):
             model.zero_grad()
             tokens, mask, prefix = (
@@ -93,9 +93,7 @@ def train(
         if epoch % config.save_every == 0:
             torch.save(
                 model.state_dict(),
-                os.path.join(
-                    config.out_dir, f"{config.prefix}-{epoch:03d}.pt"
-                ),
+                os.path.join(config.out_dir, f"ViDesc-{epoch:03d}.pt"),
             )
     return model
 

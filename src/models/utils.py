@@ -3,7 +3,7 @@ import pickle
 
 import cv2
 import pandas as pd
-import PIL
+import PIL.Image
 import torch
 from config import Config
 from sklearn.model_selection import train_test_split
