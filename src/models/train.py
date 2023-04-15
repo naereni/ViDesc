@@ -5,6 +5,7 @@ import sys
 # import wandb
 import torch
 from config import Config
+from datasets import ClipCocoDataset
 from model import GPT2_Decoder
 from torch.nn import functional as nnf
 from torch.utils.data import DataLoader
@@ -17,8 +18,6 @@ from transformers import (
     get_linear_schedule_with_warmup,
 )
 from utils import extract_features
-
-from datasets import ClipCocoDataset
 
 # wandb.init(project="ViDesc-training")
 

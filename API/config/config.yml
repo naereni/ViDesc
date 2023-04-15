@@ -1,0 +1,16 @@
+services:
+  video_description:
+    encoder_backbone: "microsoft/xclip-base-patch16-16-frames"
+    decoder_backbone: "sberbank-ai/rugpt3small_based_on_gpt2"
+    model_path: 'weights/caption_model.pth'
+    epochs: 10
+    extract_size: 224, 224
+    prefix_length: 35
+    prefix_size: 512
+    bs: 8
+    only_prefix: False
+    prompt: "Описание видео: "
+    max_words: 50
+    temperature: 1.0
+    top_p: 0.98
+    device: ${oc.env:DEVICE,'cuda:0'}
