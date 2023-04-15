@@ -1,6 +1,6 @@
 APP_PORT := 5000
 DOCKER_TAG := latest
-DOCKER_IMAGE := mikeyasnov/ViDesc
+DOCKER_IMAGE := mikeyasnov/videsc
 
 
 .PHONY: run_app
@@ -9,6 +9,7 @@ run_app:
 
 .PHONY: install
 install:
+	pip install torch torchvision torchaudio
 	pip install -r requirements.txt
 
 
