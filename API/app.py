@@ -18,7 +18,7 @@ def create_app() -> FastAPI:
 
 
 def set_routers(app: FastAPI):
-    app.include_router(app_router, prefix="/videodescription", tags=["video"])
+    app.include_router(app_router, prefix="/video", tags=["video"])
 
 
 app = create_app()

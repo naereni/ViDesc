@@ -4,7 +4,7 @@ import torch
 from PIL.Image import Image
 from src.services.model import GPT2_Decoder
 from torch.nn import functional as nnf
-from transformers import GPT2Tokenizer, XCLIPModel, XCLIPProcessor
+from transformers import AutoTokenizer, XCLIPModel, XCLIPProcessor
 
 
 class VideoDescription:
@@ -19,19 +19,19 @@ class VideoDescription:
         self.processor = XCLIPProcessor.from_pretrained(
             self.config["encoder_backbone"]
         )
-        self.tokenizer = GPT2Tokenizer.from_pretrained(
+        self.tokenizer = AutoTokenizer.from_pretrained(
             self.config["decoder_backbone"]
         )
         self.decoder = GPT2_Decoder(
-            prefix_length=self.config["prefix_length"],
+            prefix_length=int(self.config["prefix_length"]),
             backbone=self.config["decoder_backbone"],
-            prefix_size=self.config["prefix_size"],
-        )
-        self.decoder.load_state_dict(
-            torch.load(
-                self.config["model_path"], map_location=self.config["device"]
-            )
-        )
+            prefix_size=int(self.config["prefix_size"]),
+        ).to(self.config["device"])
+        # self.decoder.load_state_dict(
+        #     torch.load(
+        #         self.config["model_path"], map_location=self.config["device"]
+        #     )
+        # )
 
     def _filter_ngrams(self, output_text: str) -> str:
         a_pos = output_text.find(" A:")
@@ -41,7 +41,7 @@ class VideoDescription:
     def _generate(
         self,
         model: GPT2_Decoder,
-        tokenizer: GPT2Tokenizer,
+        tokenizer: AutoTokenizer,
         embed: torch.Tensor,
         stop_token: str = "<|endoftext|>",
     ) -> str:
@@ -58,12 +58,12 @@ class VideoDescription:
                 generated = torch.cat((embed, emb_tokens), dim=1)
             else:
                 generated = emb_tokens
-            for _ in range(self.config["max_words"]):
+            for _ in range(int(self.config["max_words"])):
                 outputs = model.gpt(inputs_embeds=generated)
                 logits = outputs.logits
                 logits = logits[:, -1, :] / (
-                    self.config["temperature"]
-                    if self.config["temperature"] > 0
+                    float(self.config["temperature"])
+                    if float(self.config["temperature"]) > 0
                     else 1.0
                 )
                 sorted_logits, sorted_indices = torch.sort(
@@ -72,8 +72,8 @@ class VideoDescription:
                 cumulative_probs = torch.cumsum(
                     nnf.softmax(sorted_logits, dim=-1), dim=-1
                 )
-                sorted_indices_to_remove = (
-                    cumulative_probs > self.config["top_p"]
+                sorted_indices_to_remove = cumulative_probs > float(
+                    self.config["top_p"]
                 )
                 sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[
                     ..., :-1
@@ -107,7 +107,7 @@ class VideoDescription:
             )
             prefix_embed = (
                 self.decoder.clip_project(embedding)
-                .reshape(1, self.config["prefix_length"], -1)
+                .reshape(1, int(self.config["prefix_length"]), -1)
                 .to(self.config["device"])
             )
             generated_text_prefix = self._generate(

@@ -9,10 +9,10 @@ from src.services.videsc import ViDesc
 @router.get("/predict")
 @inject
 def predict(
-    video_path: str,
+    path: str,
     service: ViDesc = Depends(Provide[AppContainer.videsc]),
 ):
-    video = read_video(video_path)
+    video = read_video(path=path)
     caption = service.predict(video)
 
     return caption

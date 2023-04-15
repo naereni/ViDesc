@@ -5,8 +5,15 @@ import PIL
 from PIL.Image import Image
 
 
+class Config:
+    def __init__(self) -> None:
+        self.extract_size = 224, 224
+
+
 def read_video(
-    config: tp.Dict, path: str, frames_num: int = 16
+    path: str,
+    frames_num: int = 16,
+    config: Config = Config(),
 ) -> tp.List[Image]:
     frames: tp.List[Image] = []
     cap = cv2.VideoCapture(path)
