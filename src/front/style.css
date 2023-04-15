@@ -1,0 +1,33 @@
+body {
+    background-color: #EAEAEA;
+    color: #3C4048;
+    font-family: "Poppins", sans-serif;
+}
+
+div {
+    width: 80%;
+    border-radius: 25px;
+    background-color: #3C4048;
+    color: #EAEAEA;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #3C4048;
+}
+
+button {
+    font-size: 24px;
+    padding: 12px 24px;
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+  }
+
+  video {
+    width: 40%;
+    height: auto;
+    margin-top: 16px;
+  }

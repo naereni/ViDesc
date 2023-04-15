@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>ViDesc</title>
+		<link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
+		<style>
+			article, aside, details, figcaption, figure, footer,header,
+			hgroup, menu, nav, section { display: block; }
+		</style>
+	</head>
+	<body>
+        <div class="header-title">
+            <h1>Video Description Service</h1>
+        </div>
+		<!-- <input type="file" accept="video/*">
+        <form action="upload.php" method="post" enctype="multipart/form-data">
+            <input type="file" name="video">
+            <input type="submit" value="Upload"><video width="640" height="360" controls autoplay>
+                <source src="path/to/video.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+        </form>
+        <video width="640" height="360" controls autoplay>
+            <source src="path/to/video.mp4" type="video/mp4">
+            <source src="path/to/video.webm" type="video/webm">
+            Your browser does not support the video tag.
+        </video> -->
+        <button>Загрузить видео</button>
+        <!-- <input type="file"> -->
+        <input type="file" onchange="previewVideo(this)">
+        <video id="preview"></video>
+
+        <script>
+            function previewVideo(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                    var video = document.getElementById('preview');
+                    video.src = URL.createObjectURL(input.files[0]);
+                    video.play();
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+        </script>
+    </body>
+</html>
