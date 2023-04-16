@@ -11,3 +11,7 @@
     pre-commit install && pre-commit autoupdate
     pre-commit run --all-files
 ```
+
+## Authors & Contributors
+- [@naereni](https://github.com/naereni)
+- [@mike-yasnov](https://github.com/mike-yasnov)
