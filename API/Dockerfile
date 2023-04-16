@@ -18,5 +18,6 @@ WORKDIR /videsc
 COPY . /videsc/
 
 RUN make install
+EXPOSE 5000
 
 CMD make run_app
