@@ -1,15 +1,14 @@
 APP_PORT := 5000
 DOCKER_TAG := latest
-DOCKER_IMAGE := mikeyasnov/videsc
+DOCKER_IMAGE := mikeyasunov/videsc
 
 
 .PHONY: run_app
 run_app:
-	python -m uvicorn app:app --host='0.0.0.0' --port=$(APP_PORT)
+	python3 -m uvicorn app:app --host='0.0.0.0' --port=$(APP_PORT)
 
 .PHONY: install
 install:
-	pip install torch torchvision torchaudio
 	pip install -r requirements.txt
 
 
