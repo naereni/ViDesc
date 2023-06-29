@@ -5,10 +5,11 @@ import cv2
 import pandas as pd
 import PIL.Image
 import torch
-from config import Config
 from sklearn.model_selection import train_test_split
 from tqdm.contrib import tzip
 from transformers import GPT2Tokenizer, XCLIPModel, XCLIPProcessor
+
+from src.models.config import Config
 
 DEVICE = (
     torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")

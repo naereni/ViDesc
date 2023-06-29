@@ -1,9 +1,10 @@
 import torch
-from config import Config
-from model import GPT2_Decoder
 from torch.nn import functional as nnf
 from transformers import GPT2Tokenizer, XCLIPModel, XCLIPProcessor
-from utils import read_video
+
+from src.models.config import Config
+from src.models.model import GPT2_Decoder
+from src.models.utils import read_video
 
 DEVICE = (
     torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
@@ -120,5 +121,9 @@ class Pipeline:
         return {"answer": ans}
 
 
-pp = Pipeline()
-ans = pp.get_caption("/home/naer/vids/test_video.mp4")
+def test_capt():
+    return "test success"
+
+
+# pp = Pipeline()
+# ans = pp.get_caption("/home/naer/vids/test_video.mp4")
