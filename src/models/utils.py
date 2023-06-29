@@ -16,10 +16,8 @@ DEVICE = (
 )
 
 
-def read_video(
-    config: Config, path: str, frames_num: int = 16
-) -> list[PIL.Image]:
-    frames: list[PIL.Image] = []
+def read_video(config: Config, path: str, frames_num: int = 16) -> list:
+    frames: list = []
     cap = cv2.VideoCapture(path)
     length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     N = length // (frames_num)
